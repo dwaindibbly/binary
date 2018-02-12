@@ -110,7 +110,7 @@ bool isClear(int bits, int n) => getBit(bits, n) == 0;
 /// ```dart
 /// int8.chunk(bits, left, size);
 /// ```
-int bitChunk(int bits, int left, int size) {
+int bitChunk(int bits, int left, int size,[int baseLeft]) {
   assert(() {
     if (left < 0) {
       throw new RangeError.value(left, 'left', 'Out of range. Must be > 0.');
@@ -119,8 +119,12 @@ int bitChunk(int bits, int left, int size) {
       throw new RangeError.value(size, 'size', 'Out of range. Must be >= 1.');
     }
     return true;
-  });
-  return (bits >> (left + 1 - size)) & ~(~0 << size);
+  }());
+  int left2 = left;
+  if (baseLeft != null) {
+    left2 = left - (baseLeft - bits.bitLength);
+  }
+  return (bits >> (left2 + 1 - size)) & ~(~0 << size);
 }
 
 /// Returns an int containing bits in [left] to [right] _inclusive_ from [bits].
@@ -132,8 +136,8 @@ int bitChunk(int bits, int left, int size) {
 /// ```dart
 /// int8.range(bits, left, right);
 /// ```
-int bitRange(int bits, int left, int right) {
-  return bitChunk(bits, left, left - right + 1);
+int bitRange(int bits, int left, int right,[int intSize]) {
+  return bitChunk(bits, left, left - right + 1,intSize);
 }
 
 /// Returns an int from [bits], in order to right-most to left-most.
@@ -152,7 +156,7 @@ int fromBits(List<int> bits) {
       throw new ArgumentError.value('Must be non-empty', 'bits');
     }
     return true;
-  });
+  }());
   var result = 0;
   for (var n = 0; n < bits.length; n++) {
     if (bits[n] == 1) {
@@ -302,11 +306,11 @@ class Integral implements Comparable<Integral> {
   /// The result is left-padded with 0's.
   ///
   /// In _checked mode_, throws if [bits], [left], or [size] out of range.
-  int chunk(int bits, int left, int size) {
+  int chunk(int bits, int left, int size,[bool fromOwnSize]) {
     _assertInRange(bits, 'bits');
     _assertInRange(left, 'left');
     _assertInRange(size, 'size');
-    return bitChunk(bits, left, size);
+    return bitChunk(bits, left, size,(fromOwnSize) ? length : null);
   }
 
   /// Returns an int containing bits in [left] to [right] inclusive from [bits].
@@ -314,8 +318,8 @@ class Integral implements Comparable<Integral> {
   /// The result is left-padded with 0's.
   ///
   /// In _checked mode_, throws if [bits], [left], or [right] out of range.
-  int range(int bits, int left, int right) {
-    return bitRange(bits, left, right);
+  int range(int bits, int left, int right,[bool fromOwnLeft]) {
+    return bitRange(bits, left, right,(fromOwnLeft) ? length : null);
   }
 
   /// Returns an int from [bits], in order to left-most to right-most.
@@ -409,7 +413,7 @@ class Integral implements Comparable<Integral> {
         throw _rangeError(value, name);
       }
       return true;
-    });
+    }());
   }
 
   /// Returns whether [value] falls in the range of representable by this type.
