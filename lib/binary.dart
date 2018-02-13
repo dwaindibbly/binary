@@ -110,7 +110,8 @@ bool isClear(int bits, int n) => getBit(bits, n) == 0;
 /// ```dart
 /// int8.chunk(bits, left, size);
 /// ```
-int bitChunk(int bits, int left, int size,[int baseLeft]) {
+//(bits >> (intSize - endsAt)) & ~(~0 << (size))
+int bitChunk(int bits, int left, int size,[int intSize]) {
   assert(() {
     if (left < 0) {
       throw new RangeError.value(left, 'left', 'Out of range. Must be > 0.');
@@ -120,14 +121,17 @@ int bitChunk(int bits, int left, int size,[int baseLeft]) {
     }
     return true;
   }());
-  int left2 = left;
-  if (baseLeft != null) {
-    left2 = left - (baseLeft - bits.bitLength);
-  }
-  return (bits >> (left2 + 1 - size)) & ~(~0 << size);
+  intSize ??= bits.bitLength;
+  return (bits >> (intSize - (left + size))) & ~(~0 << size);
 }
 
-/// Returns an int containing bits in [left] to [right] _inclusive_ from [bits].
+/// from the index of left _inclusive_ to index of right _exclusive_ within bits
+///
+/// for example:
+///
+/// ```dart
+/// bitRange(0xFF0000,0,8) == 0xFF
+/// ```
 ///
 /// The result is left-padded with 0's.
 ///
@@ -137,7 +141,7 @@ int bitChunk(int bits, int left, int size,[int baseLeft]) {
 /// int8.range(bits, left, right);
 /// ```
 int bitRange(int bits, int left, int right,[int intSize]) {
-  return bitChunk(bits, left, left - right + 1,intSize);
+  return bitChunk(bits, left, right - left,intSize);
 }
 
 /// Returns an int from [bits], in order to right-most to left-most.
