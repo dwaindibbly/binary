@@ -508,6 +508,12 @@ const Integral int4 = const Integral._(4);
 /// * Single decimal digits
 const Integral uint4 = const Integral._unsigned(4);
 
+/// An unsigned 5-bit aggregation.
+/// 
+/// Commonly used to represent:
+///  * A SNES B,G or R value
+const Integral uint5 = const Integral._unsigned(5);
+
 /// A (signed) 8-bit aggregation.
 ///
 /// Also known as an _octet_, _byte_.
