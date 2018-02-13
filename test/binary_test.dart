@@ -6,7 +6,7 @@ import 'package:test/test.dart';
 
 void main() {
   test('bitRange', () {
-    expect(bitRange(0x01020304, 31, 24), 0x01);
+    expect(bitRange(0x01020304, 0, 8,32), 0x01);
   });
 
   test('fromBits', () {
